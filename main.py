@@ -2,6 +2,10 @@ import datetime, json, os, pyperclip, random, string, tabulate
 from InquirerPy.separator import Separator as sep
 from InquirerPy import inquirer as inq
 
+TAG = "v1.0"
+
+clear = lambda: os.system("clear") if os.name != "nt" else os.system("cls")
+
 
 class Generator:
     def __init__(self) -> None:
@@ -19,100 +23,87 @@ class Generator:
         return __generatedKey
 
 
-class PreviouslyGeneratedDatabase:
-    def __init__(self) -> None:
-        if not os.path.exists("./data"):
-            os.mkdir("./data")
-
-        try:
-            self.__file = open("./data/generatedKeys.json", "at")
-        except Exception as e:
-            print(e.__traceback__)
-            exit(1)
-
-    def __del__(self):
-        self.__file.close()
-
-    # def saveKey(self, key: string) -> None:
-    #     try:
-    #         __keyDatabase = json.loads(self.__file.read())
-    #     except Exception as e:
-    #         print(e.__traceback__)
-    #         exit(1)
-
-    #     keyID = "lmao"
-    #     timestamp = "01/04/2006"
-
-    #     __keyDict = {"keyID": keyID, "key": key, "timestamp": timestamp}
-    #     self.__file.write(json.dumps(__keyDict, indent=4))
-
-    def getKeys(self) -> json:
-        pass
-
-    def deleteKey(self, keyID: string) -> None:
-        pass
-
-    def secureWipe(self) -> None:
-        pass
-
-
-class KeygenUi:
+class Main:
     def __init__(self) -> None:
         self.running = True
 
-    def start(self) -> None:
+    def run(self) -> None:
         while self.running:
-            self.main()
+            self.mainMenu()
 
-    def main(self) -> None:
-        print("=" * 15, "Random Keygen", "=" * 15)
-        print("=" * 14, "© 2025 garrynet", "=" * 14)
+    def printHeader(self, title: string = "Random Keygen"):
+        clear()
+
+        HEAD_CHAR = "="
+        TITLE_CHAR = " "
+        FOOT_CHAR = "="
+
+        # Total length must add up to 45
+        titleCharCount = 43 // 2 - len(title) // 2
+        formattedTitle = " ".join(
+            [TITLE_CHAR * titleCharCount, title, TITLE_CHAR * titleCharCount]
+        )
+
+        if len(formattedTitle) < 45:
+            formattedTitle = formattedTitle + " "
+
+        print(HEAD_CHAR * 14, "© 2025 garrynet", HEAD_CHAR * 14)
+        print(formattedTitle)
+        print(FOOT_CHAR * 19, TAG, FOOT_CHAR * 20)
         print("")
+
+    def mainMenu(self) -> None:
+        self.printHeader()
+
+        choicePool = [
+            "Generate Key",  # 0
+            sep(),
+            "Recall",  # 2
+            "Wipe History",  # 3
+            sep(),
+            "Exit",  # 5
+        ]
+
         selection = inq.select(
-            message="Operations:",
-            choices=["Generate", sep(), "View Previous", "Exit"],
+            message="Select Operation:",
+            choices=choicePool,
             qmark="[*]",
             amark="[+]",
+            pointer=">",
         ).execute()
 
+        # I'm aware I could've matched to strings, but I wanted to make it easier to rename options down the line
         match selection:
-            case "Generate":
-                generator = Generator()
-                print("")
-                __newKey = generator.generateKey(8)
-                pyperclip.copy(__newKey)
-                print(__newKey)
-                print("")
-            case "View Previous":
-                pass
-            case "Exit":
-                pass
-            case _:
-                raise NotImplementedError
+            case x if x == choicePool[0]:  # Generate Key
+                self.generateMenu()
+            case x if x == choicePool[2]:  # Recall
+                self.recallMenu()
+            case x if x == choicePool[3]:  # Wipe History
+                self.confirmWipe()
+            case x if x == choicePool[5]:  # Exit
+                self.running = False
+                clear()
 
-        self.running = False
+    def generateMenu(self) -> None:
+        self.printHeader("Generate Key")
+        input()
 
-    def genKey(self) -> None:
-        pass
+    def recallMenu(self) -> None:
+        self.printHeader("Recall")
+        input()
 
-    def sendToClipboard(self, key) -> None:
-        pass
-
-    def showKeys(self) -> None:
-        pass
-
-    def markKeysForDeletion(self) -> None:
-        pass
-
-    def confirmSecureWipe(self) -> None:
-        pass
+    def confirmWipe(self) -> None:
+        self.printHeader("Wipe History")
+        input()
 
 
 if __name__ == "__main__":
     try:
-        ui = KeygenUi()
-        ui.start()
+        app = Main()
+        app.run()
     except KeyboardInterrupt:
         print("Stopping...")
+        exit(0)
     except Exception as e:
         print(e)
+        exit(1)
