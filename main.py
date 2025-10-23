@@ -1,4 +1,5 @@
 import datetime, json, os, pyperclip, random, string, tabulate
+from InquirerPy.separator import Separator as sep
 from InquirerPy import inquirer as inq
 
 
@@ -57,10 +58,39 @@ class PreviouslyGeneratedDatabase:
 
 class KeygenUi:
     def __init__(self) -> None:
-        pass
+        self.running = True
+
+    def start(self) -> None:
+        while self.running:
+            self.main()
 
     def main(self) -> None:
-        pass
+        print("=" * 15, "Random Keygen", "=" * 15)
+        print("=" * 14, "© 2025 garrynet", "=" * 14)
+        print("")
+        selection = inq.select(
+            message="Operations:",
+            choices=["Generate", sep(), "View Previous", "Exit"],
+            qmark="[*]",
+            amark="[+]",
+        ).execute()
+
+        match selection:
+            case "Generate":
+                generator = Generator()
+                print("")
+                __newKey = generator.generateKey(8)
+                pyperclip.copy(__newKey)
+                print(__newKey)
+                print("")
+            case "View Previous":
+                pass
+            case "Exit":
+                pass
+            case _:
+                raise NotImplementedError
+
+        self.running = False
 
     def genKey(self) -> None:
         pass
@@ -79,9 +109,10 @@ class KeygenUi:
 
 
 if __name__ == "__main__":
-    gen1 = Generator()
-    newKey = gen1.generateKey(16)
-
-    database = PreviouslyGeneratedDatabase()
-    database.saveKey(newKey)
-    del database
+    try:
+        ui = KeygenUi()
+        ui.start()
+    except KeyboardInterrupt:
+        print("Stopping...")
+    except Exception as e:
+        print(e)
