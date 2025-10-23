@@ -1,4 +1,4 @@
-import datetime, json, os, pyperclip, random, string, tabulate
+import datetime, json, os, pyperclip, random, string, tabulate, traceback
 from InquirerPy.separator import Separator as sep
 from InquirerPy import inquirer as inq
 
@@ -9,15 +9,19 @@ clear = lambda: os.system("clear") if os.name != "nt" else os.system("cls")
 
 class Generator:
     def __init__(self) -> None:
-        self.__charPool = string.ascii_letters + string.digits + string.punctuation
         self.systemRandom = random.SystemRandom()
 
-    def generateKey(self, length: int) -> str:
-        poolLength = len(self.__charPool)
+    def generateKey(self, length: int, special: bool = True) -> str:
+        if special:
+            __charPool = string.ascii_letters + string.digits + string.punctuation
+        else:
+            __charPool = string.ascii_letters + string.digits
+
+        poolLength = len(__charPool)
         __keyBuilder = []
         for i in range(length):
             __keyBuilder.append(
-                self.__charPool[self.systemRandom.randint(0, poolLength - 1)]
+                __charPool[self.systemRandom.randint(0, poolLength - 1)]
             )
         __generatedKey = "".join(__keyBuilder)
         return __generatedKey
@@ -86,15 +90,45 @@ class Main:
 
     def generateMenu(self) -> None:
         self.printHeader("Generate Key")
-        input()
+
+        print("NOTE: Some Services Are NOT Compatible With Special Characters\n")
+        specialCharsToggle = inq.confirm(
+            message="Would You Like to Use Special Characters?",
+            default=True,
+            qmark="[*]",
+            amark="[+]",
+        ).execute()
+
+        desiredLength = inq.number(
+            message="Input Desired Key Length:",
+            default=32,
+            max_allowed=128,
+            min_allowed=1,
+            qmark="[*]",
+            amark="[+]",
+        ).execute()
+
+        desiredLength = int(desiredLength)
+
+        generatorObject = Generator()
+        __key = generatorObject.generateKey(desiredLength, specialCharsToggle)
+
+        print("\n" + "-" * desiredLength + "\n")
+        print(__key)
+        print("\n" + "-" * desiredLength + "\n")
+
+        pyperclip.copy(__key)
+        print("[+] Copied to Clipboard.\n")
+
+        input("Press Return to Continue.")
 
     def recallMenu(self) -> None:
         self.printHeader("Recall")
-        input()
+        input("Press Return to Continue.")
 
     def confirmWipe(self) -> None:
         self.printHeader("Wipe History")
-        input()
+        input("Press Return to Continue.")
 
 
 if __name__ == "__main__":
@@ -105,5 +139,5 @@ if __name__ == "__main__":
         print("Stopping...")
         exit(0)
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         exit(1)

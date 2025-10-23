@@ -6,15 +6,15 @@ Random Keygen is a lightweight command-line utility for generating strong, rando
 
 ## Features
 
--   **Generate Strong Keys**  
+-   **Generate Strong Keys**
     Adjustable length (8, 16, 32, ...)
--   **Clipboard Integration**  
+-   **Clipboard Integration**
     Automatically copies newly generated keys to your clipboard.
--   **Recent Keys Database**  
-    Keep a local JSON record of recently generated keys with timestamps.
+-   **Recent Keys Database**
+    Keep a local `Pickle` record of recently generated keys with timestamps.
     -   Search
     -   Copy
     -   Delete
     -   Securely wipe
--   **Presets**  
+-   **Presets**
     Quickly generate keys using predefined strength and complexity settings.
