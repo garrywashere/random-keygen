@@ -1,9 +1,9 @@
-import datetime, os, pickle, pyperclip, random, secrets, string, tabulate, traceback, xxhash
+import datetime, os, pickle, pyperclip, random, secrets, string, sys, tabulate, traceback, xxhash
 from InquirerPy.separator import Separator as sep
 from InquirerPy import inquirer as inq
 
 RECENTLY_GENERATED_PATH = "./data/recentlyGenerated.bin"
-TAG = "v1.0"
+TAG = "v1.1"
 
 clear = lambda: os.system("clear") if os.name != "nt" else os.system("cls")
 
@@ -205,10 +205,10 @@ if __name__ == "__main__":
     try:
         app = Main()
         app.run()
-        exit(0)
+        sys.exit(0)
     except KeyboardInterrupt:
         print("Stopping...")
-        exit(0)
+        sys.exit(0)
     except Exception as e:
         traceback.print_exc()
-        exit(1)
+        sys.exit(1)
