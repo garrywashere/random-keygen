@@ -1,7 +1,8 @@
-import datetime, json, os, pyperclip, random, string, tabulate, traceback
+import datetime, os, pickle, pyperclip, random, secrets, string, tabulate, traceback, xxhash
 from InquirerPy.separator import Separator as sep
 from InquirerPy import inquirer as inq
 
+RECENTLY_GENERATED_PATH = "./data/recentlyGenerated.bin"
 TAG = "v1.0"
 
 clear = lambda: os.system("clear") if os.name != "nt" else os.system("cls")
@@ -27,9 +28,38 @@ class Generator:
         return __generatedKey
 
 
+class Key:
+    def __init__(self, key: str) -> None:
+        self.__key = key
+
+        self.timestamp = datetime.datetime.now().strftime("%Y/%m/%d @ %H:%M:%S")
+
+    def generateKeyId(self) -> None:
+        hasher = xxhash.xxh64()
+        salt = secrets.token_hex(8)
+        hasher.update((salt + self.__key).encode())
+
+        self.keyId = hasher.hexdigest()
+
+    def getListWithKey(self) -> list:
+        return [self.keyId, self.__key, self.timestamp]
+
+    def getList(self) -> list:
+        return [self.keyId, self.timestamp]
+
+
 class Main:
     def __init__(self) -> None:
         self.running = True
+
+        if not os.path.exists(RECENTLY_GENERATED_PATH):
+            try:
+                os.mkdir("./data")
+            except FileExistsError:
+                pass
+
+            with open(RECENTLY_GENERATED_PATH, "wb") as file:
+                pickle.dump([], file)
 
     def run(self) -> None:
         while self.running:
@@ -42,7 +72,7 @@ class Main:
         TITLE_CHAR = " "
         FOOT_CHAR = "="
 
-        # Total length must add up to 45
+        # total length must add up to 45
         titleCharCount = 43 // 2 - len(title) // 2
         formattedTitle = " ".join(
             [TITLE_CHAR * titleCharCount, title, TITLE_CHAR * titleCharCount]
@@ -88,6 +118,21 @@ class Main:
                 self.running = False
                 clear()
 
+    def sendToDisk(self, key: str) -> None:
+        keyObject = Key(key)
+        keyObject.generateKeyId()
+
+        # get pickle
+        __recentlyGeneratedList = None
+        with open(RECENTLY_GENERATED_PATH, "rb") as file:
+            __recentlyGeneratedList = pickle.load(file)
+
+        __recentlyGeneratedList.append(keyObject.getListWithKey())
+
+        # set pickle
+        with open(RECENTLY_GENERATED_PATH, "wb") as file:
+            pickle.dump(__recentlyGeneratedList, file)
+
     def generateMenu(self) -> None:
         self.printHeader("Generate Key")
 
@@ -117,13 +162,24 @@ class Main:
         print(__key)
         print("\n" + "-" * desiredLength + "\n")
 
+        self.sendToDisk(__key)
+
         pyperclip.copy(__key)
         print("[+] Copied to Clipboard.\n")
 
+        print("NOTE: Clipboard Contents Will Be Erased When Continuing\n")
         input("Press Return to Continue.")
+        pyperclip.copy("")
 
     def recallMenu(self) -> None:
         self.printHeader("Recall")
+
+        with open(RECENTLY_GENERATED_PATH, "rb") as file:
+            for keyRecord in pickle.load(file):
+                print(keyRecord)
+
+        print("")
+
         input("Press Return to Continue.")
 
     def confirmWipe(self) -> None:
