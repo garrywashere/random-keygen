@@ -136,7 +136,7 @@ class Main:
     def generateMenu(self) -> None:
         self.printHeader("Generate Key")
 
-        print("NOTE: Some Services Are NOT Compatible With Special Characters\n")
+        print("NOTE: Some Services Are NOT Compatible With Special Characters.\n")
         specialCharsToggle = inq.confirm(
             message="Would You Like to Use Special Characters?",
             default=True,
@@ -184,13 +184,28 @@ class Main:
 
     def confirmWipe(self) -> None:
         self.printHeader("Wipe History")
-        input("Press Return to Continue.")
+
+        print("WARNING: This Operation Is Non-Reversible, ALL DATA WILL BE LOST.\n")
+        confirmation = inq.confirm(
+            message="Are You Sure?", default=False, qmark="[*]", amark="[+]"
+        ).execute()
+
+        # TESTING ONLY! NOT SECURE!
+        # implement secure erase later
+        if confirmation:
+            os.remove(RECENTLY_GENERATED_PATH)
+            print("\n[+] Wipe Complete.")
+
+            self.running = False
+
+        input("\nPress Return to Continue.")
 
 
 if __name__ == "__main__":
     try:
         app = Main()
         app.run()
+        exit(0)
     except KeyboardInterrupt:
         print("Stopping...")
         exit(0)
